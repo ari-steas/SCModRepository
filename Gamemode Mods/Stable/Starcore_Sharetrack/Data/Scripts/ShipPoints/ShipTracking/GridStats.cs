@@ -1,48 +1,53 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using CoreSystems.Api;
-using DefenseShields;
 using Sandbox.Definitions;
 using Sandbox.Game.Entities;
-using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
+using StarCore.ShareTrack.API;
+using StarCore.ShareTrack.API.CoreSystem;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 
-namespace ShipPoints.ShipTracking
+namespace StarCore.ShareTrack.ShipTracking
 {
     internal class GridStats // TODO convert this to be event-driven. OnBlockPlace, etc. Keep a queue.
     {
         private readonly HashSet<IMyCubeBlock> _fatBlocks = new HashSet<IMyCubeBlock>();
 
         private readonly HashSet<IMySlimBlock> _slimBlocks;
-        private ShieldApi ShieldApi => PointCheck.I.ShieldApi;
-        private WcApi WcApi => PointCheck.I.WcApi;
+        private WcApi WcApi => AllGridsList.I.WcApi;
 
         public bool NeedsUpdate { get; private set; } = true;
+        public bool IsPrimaryGrid = true;
 
         #region Public Methods
 
         public GridStats(IMyCubeGrid grid)
         {
-            Grid = grid;
+            if (grid == null)
+            {
+                Log.Error("GridStats constructor called with null grid");
+                throw new ArgumentNullException(nameof(grid));
+            }
 
+            Grid = grid;
             var allSlimBlocks = new List<IMySlimBlock>();
             Grid.GetBlocks(allSlimBlocks);
             _slimBlocks = allSlimBlocks.ToHashSet();
 
             foreach (var block in _slimBlocks)
             {
-                if (block.FatBlock != null)
+                if (block?.FatBlock != null)
+                {
                     _fatBlocks.Add(block.FatBlock);
-                GridIntegrity += block.Integrity;
+                    GridIntegrity += block.Integrity;
+                }
             }
 
             OriginalGridIntegrity = GridIntegrity;
-
             Grid.OnBlockAdded += OnBlockAdd;
             Grid.OnBlockRemoved += OnBlockRemove;
-            Grid.OnGridBlockDamaged += OnBlockDamage;
             Update();
         }
 
@@ -50,10 +55,39 @@ namespace ShipPoints.ShipTracking
         {
             Grid.OnBlockAdded -= OnBlockAdd;
             Grid.OnBlockRemoved -= OnBlockRemove;
-            Grid.OnGridBlockDamaged -= OnBlockDamage;
 
             _slimBlocks.Clear();
             _fatBlocks.Clear();
+        }
+
+        public void UpdateAfterSim()
+        {
+            UpdateCounter++;
+
+            if (Grid != null)
+            {
+                int updateCount = (int)(Grid.EntityId % UpdateInterval);
+
+                if (UpdateCounter % UpdateInterval == updateCount)
+                {
+                    float tempGridInteg = 0;
+
+                    foreach (var block in _slimBlocks)
+                    {
+                        if (block.FatBlock != null) // Remove To Count All Blocks
+                        {
+                            tempGridInteg += block.Integrity;
+                        }
+                    }
+
+                    GridIntegrity = tempGridInteg;
+                }
+            }
+
+            if (UpdateCounter >= int.MaxValue - UpdateInterval)
+            {
+                UpdateCounter = 0;
+            }             
         }
 
         public void Update()
@@ -93,6 +127,7 @@ namespace ShipPoints.ShipTracking
         public readonly Dictionary<string, int> SpecialBlockCounts = new Dictionary<string, int>();
         public float TotalThrust { get; private set; }
         public float TotalTorque { get; private set; }
+        public int TotalPowerBlocks { get; private set; }
 
         public float GridIntegrity { get; private set; }
         public float OriginalGridIntegrity { get; private set; }
@@ -120,8 +155,6 @@ namespace ShipPoints.ShipTracking
             if (block.FatBlock != null)
                 _fatBlocks.Add(block.FatBlock);
 
-            GridIntegrity += block.Integrity;
-
             NeedsUpdate = true;
         }
 
@@ -134,20 +167,15 @@ namespace ShipPoints.ShipTracking
             if (block.FatBlock != null)
                 _fatBlocks.Remove(block.FatBlock);
 
-            GridIntegrity -= block.Integrity;
-
             NeedsUpdate = true;
-        }
-
-        private void OnBlockDamage(IMySlimBlock block, float damage, MyHitInfo? hitInfo, long attacker)
-        {
-            GridIntegrity -= damage;
         }
 
         #endregion
 
         #region Private Fields
 
+        private int UpdateCounter = 0;
+        private int UpdateInterval = 100;
         // TODO
 
         #endregion
@@ -161,33 +189,40 @@ namespace ShipPoints.ShipTracking
 
             TotalThrust = 0;
             TotalTorque = 0;
+            TotalPowerBlocks = 0;
 
             foreach (var block in _fatBlocks)
             {
-                if (block is IMyCockpit && block.IsFunctional)
+                // Does not check for functionality of blocks because they can be welded.
+                if (block is IMyCockpit)
                     CockpitCount++;
-
-                if (block is IMyThrust && block.IsFunctional)
+                else if (block is IMyThrust)
                 {
                     TotalThrust += ((IMyThrust)block).MaxEffectiveThrust;
                 }
-
-                else if (block is IMyGyro && block.IsFunctional)
+                else if (block is IMyGyro)
                 {
                     TotalTorque +=
                         ((MyGyroDefinition)MyDefinitionManager.Static.GetDefinition((block as IMyGyro).BlockDefinition))
                         .ForceMagnitude * (block as IMyGyro).GyroStrengthMultiplier;
                 }
+                else if (block is IMyPowerProducer)
+                {
+                    TotalPowerBlocks++;
+                }
 
-                if (!(block is IMyConveyorSorter) || !WcApi.HasCoreWeapon((MyEntity)block))
+                if (!AllGridsList.I.WeaponSubtytes.Contains(block.BlockDefinition.SubtypeId))
                 {
                     var blockDisplayName = block.DefinitionDisplayNameText;
                     if (blockDisplayName
                         .Contains("Armor") && !blockDisplayName.StartsWith("Armor Laser")) // This is a bit stupid. TODO find a better way to sort out armor blocks.
                         continue;
 
+                    if (!AllGridsList.PointValues.ContainsKey(block.BlockDefinition.SubtypeName))
+                        continue;
+
                     float ignored = 0;
-                    PointCheck.ClimbingCostRename(ref blockDisplayName, ref ignored);
+                    AllGridsList.ClimbingCostRename(ref blockDisplayName, ref ignored);
                     ShipTracker.SpecialBlockRename(ref blockDisplayName, block);
                     if (!SpecialBlockCounts.ContainsKey(blockDisplayName))
                         SpecialBlockCounts.Add(blockDisplayName, 0);
@@ -211,18 +246,14 @@ namespace ShipPoints.ShipTracking
         private void UpdateWeaponStats()
         {
             WeaponCounts.Clear();
-            foreach (var weaponBlock in _fatBlocks)
+            // Check that the block has points and is a weapon
+            foreach (var weaponBlock in _fatBlocks.Where(b => AllGridsList.I.WeaponSubtytes.Contains(b.BlockDefinition.SubtypeId)))
             {
-                // Check that the block has points and is a weapon
-                int weaponPoints;
                 var weaponDisplayName = weaponBlock.DefinitionDisplayNameText;
-                if (!PointCheck.PointValues.TryGetValue(weaponBlock.BlockDefinition.SubtypeName, out weaponPoints) ||
-                    !WcApi.HasCoreWeapon((MyEntity)weaponBlock))
-                    continue;
 
                 float thisClimbingCostMult = 0;
 
-                PointCheck.ClimbingCostRename(ref weaponDisplayName, ref thisClimbingCostMult);
+                AllGridsList.ClimbingCostRename(ref weaponDisplayName, ref thisClimbingCostMult);
 
                 if (!WeaponCounts.ContainsKey(weaponDisplayName))
                     WeaponCounts.Add(weaponDisplayName, 0);
@@ -235,16 +266,22 @@ namespace ShipPoints.ShipTracking
         {
             int blockPoints;
             var blockDisplayName = block.DefinitionDisplayNameText;
-            if (!PointCheck.PointValues.TryGetValue(block.BlockDefinition.SubtypeName, out blockPoints))
+            if (!AllGridsList.PointValues.TryGetValue(block.BlockDefinition.SubtypeName, out blockPoints))
                 return;
 
             float thisClimbingCostMult = 0;
-            PointCheck.ClimbingCostRename(ref blockDisplayName, ref thisClimbingCostMult);
+            AllGridsList.ClimbingCostRename(ref blockDisplayName, ref thisClimbingCostMult);
 
             if (!BlockCounts.ContainsKey(blockDisplayName))
                 BlockCounts.Add(blockDisplayName, 0);
 
-            var thisSpecialBlocksCount = BlockCounts[blockDisplayName]++;
+            int thisSpecialBlocksCount = BlockCounts[blockDisplayName]++;
+
+            string[] crossedGroup = AllGridsList.CrossedClimbingCostGroups.FirstOrDefault(l => l.Contains(blockDisplayName));
+            if (crossedGroup != null)
+            {
+                thisSpecialBlocksCount = crossedGroup.Where(g => g != blockDisplayName).Sum(groupName => BlockCounts.GetValueOrDefault(groupName, 0));
+            }
 
             if (thisClimbingCostMult > 0)
                 blockPoints += (int)(blockPoints * thisSpecialBlocksCount * thisClimbingCostMult);
@@ -253,8 +290,12 @@ namespace ShipPoints.ShipTracking
                 MovementPoints += blockPoints;
             if (block is IMyPowerProducer)
                 PowerPoints += blockPoints;
-            if (WcApi.HasCoreWeapon((MyEntity)block))
+            if (AllGridsList.I.WeaponSubtytes.Contains(block.BlockDefinition.SubtypeId))
             {
+                // Weapons on subgrids have an extra 20% cost applied
+                //if (!IsPrimaryGrid)
+                //    blockPoints = (int)(blockPoints * 1.2f);
+
                 var validTargetTypes = new List<string>();
                 WcApi.GetTurretTargetTypes((MyEntity)block, validTargetTypes);
                 if (validTargetTypes.Contains("Projectiles"))

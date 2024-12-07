@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.Reflection;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
 
-namespace FusionSystems.HeatParts
+namespace StarCore.FusionSystems.HeatParts
 {
     internal class HeatManager
     {
         public static HeatManager I = new HeatManager();
-        private readonly Dictionary<IMyCubeGrid, GridHeatManager> _heatSystems = new Dictionary<IMyCubeGrid, GridHeatManager>();
+
+        private readonly Dictionary<IMyCubeGrid, GridHeatManager> _heatSystems =
+            new Dictionary<IMyCubeGrid, GridHeatManager>();
 
         public void Load()
         {
@@ -38,11 +39,26 @@ namespace FusionSystems.HeatParts
             return _heatSystems.GetValueOrDefault(grid, null)?.HeatRatio ?? -1;
         }
 
+        public float GetGridHeatCapacity(IMyCubeGrid grid)
+        {
+            return _heatSystems.GetValueOrDefault(grid, null)?.HeatCapacity ?? -1;
+        }
+
+        public float GetGridHeatDissipation(IMyCubeGrid grid)
+        {
+            return _heatSystems.GetValueOrDefault(grid, null)?.GrossHeatDissipation ?? -1;
+        }
+
+        public float GetGridHeatGeneration(IMyCubeGrid grid)
+        {
+            return _heatSystems.GetValueOrDefault(grid, null)?.HeatGeneration ?? -1;
+        }
+
         private void OnEntityAdd(IMyEntity entity)
         {
             if (!(entity is IMyCubeGrid) || entity.Physics == null)
                 return;
-            var grid = (IMyCubeGrid) entity;
+            var grid = (IMyCubeGrid)entity;
 
             _heatSystems[grid] = new GridHeatManager(grid);
         }
@@ -51,7 +67,7 @@ namespace FusionSystems.HeatParts
         {
             if (!(entity is IMyCubeGrid) || entity.Physics == null)
                 return;
-            var grid = (IMyCubeGrid) entity;
+            var grid = (IMyCubeGrid)entity;
 
             _heatSystems[grid].Unload();
             _heatSystems.Remove(grid);

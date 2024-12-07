@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Sandbox.ModAPI;
+using SC.SUGMA.Utilities;
 
 namespace SC.SUGMA.Commands
 {
@@ -31,6 +32,51 @@ namespace SC.SUGMA.Commands
                 "Ends the current match.",
                 CommandMethods.End
             ),
+            ["pause"] = new Command(
+                "SUGMA.Match",
+                "Locks all grids in place and disables weapons.",
+                CommandMethods.Pause
+            ),
+            ["clearboard"] = new Command(
+                "SUGMA.Match",
+                "Ends the current match, deletes all grids, and returns players to the respawn screen.",
+                CommandMethods.ClearBoard
+            ),
+
+            #endregion
+
+            #region Util Commands
+
+            ["shields"] = new Command(
+                "SUGMA.Utils",
+                "Fills shields to full capacity.",
+                CommandMethods.Shields
+            ),
+            ["problem"] = new Command(
+                "SUGMA.Utils",
+                "Reports a problem with optional message [arg1].",
+                CommandMethods.ReportProblem
+            ),
+            ["fixed"] = new Command(
+                "SUGMA.Utils",
+                "Marks a problem as fixed.",
+                CommandMethods.ReportFixed
+            ),
+            ["missing"] = new Command(
+                "SUGMA.Utils",
+                "Manual override missing players.",
+                CommandMethods.ResolveMissingPlayers
+            ),
+            ["auto"] = new Command(
+                "SUGMA.Utils",
+                "Automatically balance tracked grids",
+                CommandMethods.AutoBalance
+            ),
+            ["clearlcd"] = new Command(
+                "SUGMA.Utils",
+                "Clear all image lcds.",
+                args => SUtils.ClearImageLcds()
+                )
 
             #endregion
         };
@@ -65,8 +111,8 @@ namespace SC.SUGMA.Commands
             Close(); // Close existing command handlers.
             I = new CommandHandler();
             MyAPIGateway.Utilities.MessageEnteredSender += I.Command_MessageEnteredSender;
-            MyAPIGateway.Utilities.ShowMessage("StarCore Universal Gamemode",
-                "Chat commands registered - run \"/sc help\" for help.");
+            MyAPIGateway.Utilities.ShowMessage("SUGMA",
+                "Run \"/sc help\" for commands.");
         }
 
         public static void Close()

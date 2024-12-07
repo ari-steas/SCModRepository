@@ -19,6 +19,11 @@ namespace StarCore.RepairModule.Networking.Custom
             if (repairModule != null)
             {
                 repairModule.priorityOnly = priorityOnly;
+
+                if (MyAPIGateway.Session.IsServer)
+                {
+                    HeartNetwork.I.SendToEveryone(this);
+                }
             }
             else
             {

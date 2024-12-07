@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using FusionSystems.FusionParts;
+using StarCore.FusionSystems.FusionParts;
 using VRageMath;
-using static FusionSystems.Communication.DefinitionDefs;
+using static StarCore.FusionSystems.Communication.DefinitionDefs;
 
-namespace FusionSystems
+namespace StarCore.FusionSystems
 {
     internal partial class ModularDefinition
     {
@@ -15,13 +15,13 @@ namespace FusionSystems
             // Unique name of the definition.
             Name = "Modular_Fusion",
 
-            OnInit = () => { S_FusionManager.I.FusionDefinition = this; },
+            OnInit = () => { SFusionManager.I.FusionDefinition = this; },
 
             // Triggers whenever a new part is added to an assembly.
-            OnPartAdd = S_FusionManager.I.OnPartAdd,
+            OnPartAdd = SFusionManager.I.OnPartAdd,
 
             // Triggers whenever a part is removed from an assembly.
-            OnPartRemove = S_FusionManager.I.OnPartRemove,
+            OnPartRemove = SFusionManager.I.OnPartRemove,
 
             // Triggers whenever a part is destroyed, simultaneously with OnPartRemove
             OnPartDestroy = (physicalAssemblyId, blockEntity, isBaseBlock) =>
@@ -43,7 +43,8 @@ namespace FusionSystems
                 "Caster_CentralPipe_T",
                 "Caster_Feeder",
                 //"Caster_Controller",
-                "Caster_Reactor"
+                "Caster_Reactor",
+                "Caster_ConveyorCap",
             },
 
             // Allowed connection directions & whitelists, measured in blocks.
@@ -64,7 +65,9 @@ namespace FusionSystems
                                 "Caster_CentralPipe_T",
                                 "Caster_Feeder",
                                 "Caster_Reactor",
-                                "Caster_Controller"
+                                "Caster_Controller",
+                                "Caster_FocusLens",
+                                "Caster_ConveyorCap"
                             }
                         },
                         {
@@ -75,7 +78,9 @@ namespace FusionSystems
                                 "Caster_CentralPipe_T",
                                 "Caster_Feeder",
                                 "Caster_Reactor",
-                                "Caster_Controller"
+                                "Caster_Controller",
+                                "Caster_FocusLens",
+                                "Caster_ConveyorCap"
                             }
                         },
                         {
@@ -86,7 +91,9 @@ namespace FusionSystems
                                 "Caster_CentralPipe_T",
                                 "Caster_Feeder",
                                 "Caster_Reactor",
-                                "Caster_Controller"
+                                "Caster_Controller",
+                                "Caster_FocusLens",
+                                "Caster_ConveyorCap"
                             }
                         },
                         {
@@ -97,7 +104,9 @@ namespace FusionSystems
                                 "Caster_CentralPipe_T",
                                 "Caster_Feeder",
                                 "Caster_Reactor",
-                                "Caster_Controller"
+                                "Caster_Controller",
+                                "Caster_FocusLens",
+                                "Caster_ConveyorCap"
                             }
                         }
                     }
@@ -114,7 +123,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 "Caster_FocusLens",
                                 //"Caster_Controller",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         },
                         {
@@ -126,7 +136,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 "Caster_FocusLens",
                                 //"Caster_Controller",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         }
                     }
@@ -185,7 +196,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 //"Caster_Controller",
                                 "Caster_FocusLens",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         },
                         {
@@ -197,7 +209,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 //"Caster_Controller",
                                 "Caster_FocusLens",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         }
                     }
@@ -214,7 +227,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 //"Caster_Controller",
                                 "Caster_FocusLens",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         },
                         {
@@ -226,7 +240,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 //"Caster_Controller",
                                 "Caster_FocusLens",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         }
                     }
@@ -243,7 +258,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 //"Caster_Controller",
                                 "Caster_FocusLens",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         },
                         {
@@ -255,7 +271,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 //"Caster_Controller",
                                 "Caster_FocusLens",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         },
                         {
@@ -267,7 +284,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 //"Caster_Controller",
                                 "Caster_FocusLens",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         }
                     }
@@ -284,7 +302,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 //"Caster_Controller",
                                 "Caster_FocusLens",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         },
                         {
@@ -296,7 +315,8 @@ namespace FusionSystems
                                 "Caster_Feeder",
                                 //"Caster_Controller",
                                 "Caster_FocusLens",
-                                "Caster_Reactor"
+                                "Caster_Reactor",
+                                "Caster_ConveyorCap"
                             }
                         },
 
@@ -317,7 +337,7 @@ namespace FusionSystems
                             }
                         }
                     }
-                }
+                },
                 //{
                 //    "Caster_Controller", new Dictionary<Vector3I, string[]>
                 //    {
@@ -333,6 +353,22 @@ namespace FusionSystems
                 //        }
                 //    }
                 //}
+                {
+                    "Caster_ConveyorCap", new Dictionary<Vector3I, string[]>
+                    {
+                        {
+                            Vector3I.Backward, new[]
+                            {
+                                "Caster_CentralPipe_0",
+                                "Caster_CentralPipe_90",
+                                "Caster_CentralPipe_T",
+                                "Caster_Feeder",
+                                "Caster_Reactor",
+                                "Caster_FocusLens",
+                            }
+                        }
+                    }
+                }
             }
         };
     }

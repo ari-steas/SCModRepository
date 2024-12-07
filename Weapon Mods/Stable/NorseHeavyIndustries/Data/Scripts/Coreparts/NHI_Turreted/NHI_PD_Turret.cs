@@ -88,7 +88,7 @@ namespace Scripts {
                 LockedSmartOnly = false, // Only fire at smart projectiles that are locked on to parent grid.
                 MinimumDiameter = 1, // Minimum radius of threat to engage.
                 MaximumDiameter = 25, // Maximum radius of threat to engage; 0 = unlimited.
-                MaxTargetDistance = 2500, // Maximum distance at which targets will be automatically shot at; 0 = unlimited.
+                MaxTargetDistance = 3000, // Maximum distance at which targets will be automatically shot at; 0 = unlimited.
                 MinTargetDistance = 100, // Minimum distance at which targets will be automatically shot at.
                 TopTargets = 20, // Maximum number of targets to randomize between; 0 = unlimited.
                 CycleTargets = 2, // Number of targets to "cycle" per acquire attempt.
@@ -101,7 +101,7 @@ namespace Scripts {
             HardPoint = new HardPointDef
             {
                 PartName = "20mm 'Heimdall' Point-Defense Cannon", // Name of the weapon in terminal, should be unique for each weapon definition that shares a SubtypeId (i.e. multiweapons).
-                DeviateShotAngle = 0.3f, // Projectile inaccuracy in degrees.
+                DeviateShotAngle = 0.05f, // Projectile inaccuracy in degrees.
                 AimingTolerance = 70f, // How many degrees off target a turret can fire at. 0 - 180 firing angle.
                 AimLeadingPrediction = Accurate, // Level of turret aim prediction; Off, Basic, Accurate, Advanced
                 DelayCeaseFire = 0, // Measured in game ticks (6 = 100ms, 60 = 1 second, etc..). Length of time the weapon continues firing after trigger is released - while a target is available.
