@@ -1,0 +1,9 @@
+### ADDING A NEW MOD
+
+- First, the mod needs to be uploaded ingame once so a steamworkshop link is set.
+- Then add https://steamcommunity.com/id/starcoretv/  as a friend and contributor to the mod. 
+- Make a PR and the UniversalUpload workflow by Aristeas should push it to the repository.
+
+
+### UPDATING AN EXISTING MOD
+- List changes made.
